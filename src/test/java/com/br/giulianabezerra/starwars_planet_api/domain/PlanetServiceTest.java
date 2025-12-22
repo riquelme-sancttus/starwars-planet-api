@@ -4,9 +4,9 @@ import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.PLANET;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
-import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -134,4 +134,30 @@ public class PlanetServiceTest {
         assertThat(sut).isEmpty();;
     }
 
+    @Test
+    public void deleteByIdPlanet_WithExistingId_DoesNotThrowAnyException() {
+        Long id = 1L;
+
+        when(planetRepository.existsById(id)).thenReturn(true);
+        doNothing().when(planetRepository).deleteById(id);
+
+        assertThatCode(() -> planetService.deleteById(id))
+                .doesNotThrowAnyException();
+
+        verify(planetRepository, times(1)).deleteById(anyLong());
+    }
+
+    @Test
+    public void deleteByIdPlanet_WithUnexistingId_TrowsException() {
+        Long id = 99L;
+
+        when(planetRepository.existsById(id)).thenReturn(false);
+
+        assertThatThrownBy(() -> planetService.deleteById(id))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting("status")
+                    .isEqualTo(HttpStatus.NOT_FOUND);
+
+        verify(planetRepository, never()).deleteById(anyLong());
+    }
 }
