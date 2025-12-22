@@ -3,6 +3,7 @@ package com.br.giulianabezerra.starwars_planet_api.domain;
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.INVALID_PLANET;
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.PLANET;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
@@ -11,9 +12,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -100,6 +105,33 @@ public class PlanetServiceTest {
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
                     .isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    public void findAllPlanets_ReturnsAllPlanets() {
+       List<Planet> planets = new ArrayList<>() {{
+           add(PLANET);
+       }};
+
+        Example<Planet> query = QueryBuilder.makeQuery(new Planet(PLANET.getName(),
+                PLANET.getClimate(), PLANET.getTerrain()));
+
+        when(planetRepository.findAll(query)).thenReturn(planets);
+
+        List<Planet> sut = planetService.findAll(PLANET.getTerrain(), PLANET.getClimate());
+
+        assertThat(sut).isNotEmpty();
+        assertThat(sut).hasSize(1);
+        assertThat(sut.getFirst()).isEqualTo(PLANET);
+    }
+
+    @Test
+    public void findAllPlanets_ReturnsNoPlanets() {
+        when(planetRepository.findAll(any(Example.class))).thenReturn(Collections.emptyList());
+
+        List<Planet> sut = planetService.findAll(PLANET.getTerrain(), PLANET.getClimate());
+
+        assertThat(sut).isEmpty();;
     }
 
 }
