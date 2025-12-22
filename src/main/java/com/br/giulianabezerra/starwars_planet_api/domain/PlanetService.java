@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 import static com.br.giulianabezerra.starwars_planet_api.domain.QueryBuilder.makeQuery;
 
@@ -37,4 +36,11 @@ public class PlanetService {
         return repository.findAll(query);
     }
 
+    public void deleteById(Long id) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        repository.deleteById(id);
+    }
 }
