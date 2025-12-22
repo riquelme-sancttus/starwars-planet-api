@@ -75,7 +75,31 @@ public class PlanetServiceTest {
                 .isInstanceOf(ResponseStatusException.class)
                 .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
                     .isEqualTo(HttpStatus.NOT_FOUND);
-
-
     }
+
+    @Test
+    public void findByNamePlanet_WithExistingName_ReturnsPlanet() {
+        String name = "name";
+
+        when(planetRepository.findByName(name)).thenReturn(Optional.of(PLANET));
+
+        Planet sut = planetService.findByName(name);
+
+        assertThat(sut).isNotNull();
+        assertThat(sut.getName()).isEqualTo(name);
+        assertThat(sut).isEqualTo(PLANET);
+    }
+
+    @Test
+    public void findByNamePlanet_WithUnexistingName_ThrowsException() {
+        String name = "unexisting name";
+
+        when(planetRepository.findByName(name)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> planetService.findByName(name))
+                .isInstanceOf(ResponseStatusException.class)
+                .extracting(ex -> ((ResponseStatusException) ex).getStatusCode())
+                    .isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
 }
