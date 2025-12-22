@@ -1,10 +1,14 @@
 package com.br.giulianabezerra.starwars_planet_api.domain;
 
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
+
+import static com.br.giulianabezerra.starwars_planet_api.domain.QueryBuilder.makeQuery;
 
 @Service
 public class PlanetService {
@@ -27,4 +31,10 @@ public class PlanetService {
         return repository.findByName(name)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
+
+    public List<Planet> findAll(String terrain, String climate) {
+        Example<Planet> query = makeQuery(new Planet("name", climate, terrain));
+        return repository.findAll(query);
+    }
+
 }
