@@ -1,6 +1,7 @@
 package com.br.giulianabezerra.starwars_planet_api.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 @Entity
@@ -11,8 +12,16 @@ public class Planet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Column(nullable = false)
     private String name;
+
+    @NotBlank
+    @Column(nullable = false)
     private String climate;
+
+    @NotBlank
+    @Column(nullable = false)
     private String terrain;
 
     public Planet(String name, String climate, String terrain) {
