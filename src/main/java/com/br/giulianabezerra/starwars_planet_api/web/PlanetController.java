@@ -26,4 +26,10 @@ public class PlanetController {
         var planetFound = service.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(planetFound);
     }
+
+    @GetMapping("/{name}")
+    public ResponseEntity<Planet> findByName(@PathVariable String name){
+        var planetFound = service.findByName(name);
+        return ResponseEntity.status(HttpStatus.OK).body(planetFound);
+    }
 }
