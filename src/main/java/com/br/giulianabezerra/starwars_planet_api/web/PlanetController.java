@@ -41,4 +41,10 @@ public class PlanetController {
         var planetList = service.findAll(terrain, climate);
         return ResponseEntity.ok(planetList);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
 }
