@@ -2,6 +2,7 @@ package com.br.giulianabezerra.starwars_planet_api.web;
 
 import com.br.giulianabezerra.starwars_planet_api.domain.Planet;
 import com.br.giulianabezerra.starwars_planet_api.domain.PlanetService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class PlanetController {
     }
 
     @PostMapping
-    public ResponseEntity<Planet> create(@RequestBody Planet planet) {
+    public ResponseEntity<Planet> create(@RequestBody @Valid Planet planet) {
         var planetCreated = service.create(planet);
         return ResponseEntity.status(HttpStatus.CREATED).body(planetCreated);
     }
