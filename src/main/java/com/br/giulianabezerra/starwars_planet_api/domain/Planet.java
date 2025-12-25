@@ -30,6 +30,18 @@ public class Planet {
         this.terrain = terrain;
     }
 
+    public Planet(Long id, String name, String climate, String terrain) {
+        this.id = id;
+        this.name = name;
+        this.climate = climate;
+        this.terrain = terrain;
+    }
+
+    public Planet(String climate, String terrain) {
+        this.climate = climate;
+        this.terrain = terrain;
+    }
+
     public Planet() {
     }
 
