@@ -24,13 +24,13 @@ public class PlanetController {
         return ResponseEntity.status(HttpStatus.CREATED).body(planetCreated);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<Planet> findById(@PathVariable Long id) {
         var planetFound = service.findById(id);
         return ResponseEntity.status(HttpStatus.OK).body(planetFound);
     }
 
-    @GetMapping("/{name}")
+    @GetMapping("/name/{name}")
     public ResponseEntity<Planet> findByName(@PathVariable String name){
         var planetFound = service.findByName(name);
         return ResponseEntity.status(HttpStatus.OK).body(planetFound);
