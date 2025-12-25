@@ -1,8 +1,5 @@
 package com.br.giulianabezerra.starwars_planet_api.domain;
 
-import com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants;
-import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -64,6 +61,22 @@ class PlanetRepositoryTest {
     @Test
     public void findById_ByUnexistingId_ReturnsEmpty() {
         Optional<Planet> optionalPlanet = repository.findById(1L);
+        assertThat(optionalPlanet).isEmpty();
+    }
+
+    @Test
+    public void findByName_ByExistingName_ReturnsPlanet() {
+        Planet planet = testEntityManager.persistFlushFind(PLANET);
+        Optional<Planet> optionalPlanet = repository.findByName(planet.getName());
+
+        assertThat(optionalPlanet).isPresent();
+        assertThat(optionalPlanet.get()).isEqualTo(PLANET);
+    }
+
+    @Test
+    public void findByName_ByUnexistingName_ReturnsEmpty() {
+        Optional<Planet> optionalPlanet = repository.findByName("name");
+
         assertThat(optionalPlanet).isEmpty();
     }
 
