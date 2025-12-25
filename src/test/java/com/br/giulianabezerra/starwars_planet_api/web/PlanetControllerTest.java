@@ -80,4 +80,31 @@ public class PlanetControllerTest {
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void findByName_ByExistingName_ReturnsPlanet() throws Exception {
+        String name = "name";
+
+        when(planetService.findByName(name)).thenReturn(PLANET);
+
+        mockMvc.perform(
+                get("/planets/name/{name}", name)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(PLANET));
+    }
+
+    @Test
+    public void findByName_ByUnexistingName_Throws404NotFound() throws Exception {
+        String name = "Unexisting name";
+
+        when(planetService.findByName(name)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(
+                get("/planets/name/{name}", name)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
 }
