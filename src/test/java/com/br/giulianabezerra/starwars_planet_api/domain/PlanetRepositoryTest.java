@@ -4,13 +4,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.data.domain.Example;
+import org.springframework.test.context.jdbc.Sql;
 
+import java.util.List;
 import java.util.Optional;
 
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
+import static org.assertj.core.api.Assertions.*;
 
 @DataJpaTest
 class PlanetRepositoryTest {
@@ -78,6 +79,36 @@ class PlanetRepositoryTest {
         Optional<Planet> optionalPlanet = repository.findByName("name");
 
         assertThat(optionalPlanet).isEmpty();
+    }
+
+    @Sql(scripts = "/import_planets.sql")
+    @Test
+    public void listPlanets_ReturnsAllPlanets(){
+        Example<Planet> queryWithoutFilter = QueryBuilder.makeQuery(new Planet());
+
+        List<Planet> sut = repository.findAll(queryWithoutFilter);
+
+        assertThat(sut).isNotEmpty();
+        assertThat(sut).hasSize(3);
+    }
+
+    @Test
+    public void listPlanets_ReturnsFilteredPlanets(){
+        Example<Planet> queryWithFilter = QueryBuilder.makeQuery(
+                new Planet(TATOOINE.getClimate(), TATOOINE.getTerrain())
+        );
+
+        List<Planet> sut = repository.findAll(queryWithFilter);
+
+        assertThat(sut).isNotEmpty();
+        assertThat(sut).hasSize(1);
+        assertThat(sut.getFirst()).isEqualTo(TATOOINE);
+    }
+
+    @Test
+    public void listPlanets_ReturnsNoPlanet(){
+        List<Planet> sut = repository.findAll(QueryBuilder.makeQuery(INVALID_PLANET));
+        assertThat(sut).isEmpty();
     }
 
 }
