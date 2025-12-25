@@ -5,9 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.server.ResponseStatusException;
 import tools.jackson.databind.ObjectMapper;
 
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.PLANET;
@@ -16,6 +18,8 @@ import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -53,5 +57,27 @@ public class PlanetControllerTest {
 
         mockMvc.perform(post("/planets").content(objMapper.writeValueAsBytes(PLANET)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isConflict());
 
+    }
+
+    @Test
+    public void findById_ByExistingId_ReturnsPlanet() throws Exception {
+        when(planetService.findById(1L)).thenReturn(PLANET);
+        mockMvc.perform(
+                get("/planets/id/{id}", 1L)
+                )
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").value(PLANET));
+    }
+
+    @Test
+    public void findById_ByUnexistingId_Returns404NotFound() throws Exception {
+        when(planetService.findById(99L)).thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(
+                get("/planets/id/{id}", 99L)
+                )
+                .andDo(print())
+                .andExpect(status().isNotFound());
     }
 }
