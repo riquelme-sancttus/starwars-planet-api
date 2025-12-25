@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 
+import java.util.Optional;
+
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -48,6 +50,21 @@ class PlanetRepositoryTest {
         planet.setId(null);
 
         assertThatThrownBy(() -> repository.save(planet)).isInstanceOf(RuntimeException.class);
+    }
+
+    @Test
+    public void findById_ByExistingId_ReturnsPlanet(){
+        Planet planet = testEntityManager.persistFlushFind(PLANET);
+        Optional<Planet> optionalPlanet = repository.findById(1L);
+
+        assertThat(optionalPlanet).isPresent();
+        assertThat(optionalPlanet.get()).isEqualTo(PLANET);
+    }
+
+    @Test
+    public void findById_ByUnexistingId_ReturnsEmpty() {
+        Optional<Planet> optionalPlanet = repository.findById(1L);
+        assertThat(optionalPlanet).isEmpty();
     }
 
 }
