@@ -1,5 +1,6 @@
 package com.br.giulianabezerra.starwars_planet_api.domain;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
@@ -109,6 +110,21 @@ class PlanetRepositoryTest {
     public void listPlanets_ReturnsNoPlanet(){
         List<Planet> sut = repository.findAll(QueryBuilder.makeQuery(INVALID_PLANET));
         assertThat(sut).isEmpty();
+    }
+
+    @Sql(scripts = "/import_planets.sql")
+    @Test
+    public void removePlanet_WithExistingId_RemovesPlanetFromDatabase(){
+        repository.deleteById(2L);
+
+        Planet removedPlanet = testEntityManager.find(Planet.class, 2L);
+        assertThat(removedPlanet).isNull();
+    }
+
+    @Test
+    public void removePlanet_WithUnexistingId_DoesNotThrowException(){
+        assertThatCode(() -> repository.deleteById(1L))
+                .doesNotThrowAnyException();
     }
 
 }

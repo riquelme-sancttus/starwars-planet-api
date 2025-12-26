@@ -17,9 +17,10 @@ import java.util.List;
 
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -148,5 +149,24 @@ public class PlanetControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(0)));
+    }
+
+    @Test
+    public void removePlanet_WithExistingId_Returns204NoContent() throws Exception {
+        mockMvc.perform(
+                delete("/planets/{id}", 1L)
+        )
+                .andExpect(status().isNoContent());
+
+    }
+
+    @Test
+    public void removePlanet_WithUnexistingId_Returns404NotFound() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(planetService).deleteById(1L);
+
+        mockMvc.perform(
+                delete("/planets{id}", 1L)
+        )
+                .andExpect(status().isNotFound());
     }
 }
