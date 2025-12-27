@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: ${MYSQL_HOST:jdbc:mysql://localhost/starwars?useSSL=false}
+    username: ${MYSQL_USERNAME:dbuser}
+    password: ${MYSQL_PASSWORD:dbpass}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
