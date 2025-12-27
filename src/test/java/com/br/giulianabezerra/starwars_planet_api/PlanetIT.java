@@ -89,4 +89,23 @@ public class PlanetIT {
                 restClient.get().uri(id).retrieve().toEntity(Planet.class)
         ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
+
+    @Test
+    public void findByName_ByExistingName_ReturnsPlanet() {
+        String name = getBaseUrl() + "/name" + "/Yavin IV";
+
+        ResponseEntity<Planet> sut = restClient.get().uri(name).retrieve().toEntity(Planet.class);
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isEqualTo(YAVIN_IV);
+    }
+
+    @Test
+    public void findByName_ByUnexistingName_Returns404NotFound() {
+        String name = getBaseUrl() + "/name/" + "Unexisting Name xD";
+
+        assertThatThrownBy(() ->
+                restClient.get().uri(name).retrieve().toEntity(Planet.class)
+        ).isInstanceOf(HttpClientErrorException.NotFound.class);
+    }
 }
