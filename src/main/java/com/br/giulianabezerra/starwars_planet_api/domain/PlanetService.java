@@ -32,7 +32,7 @@ public class PlanetService {
     }
 
     public List<Planet> findAll(String terrain, String climate) {
-        Example<Planet> query = makeQuery(new Planet("name", climate, terrain));
+        Example<Planet> query = makeQuery(new Planet(climate, terrain));
         return repository.findAll(query);
     }
 
