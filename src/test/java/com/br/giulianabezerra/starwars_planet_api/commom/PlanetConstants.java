@@ -11,8 +11,8 @@ public class PlanetConstants {
         public static final Planet NULL_PLANET = new Planet();
 
         public static final Planet TATOOINE = new Planet(1L, "Tatooine", "arid", "desert");
-        public static final Planet ALDERAAN = new Planet(2L, "Alderaan", "temperature", "grasslands, mountains");
-        public static final Planet YAVIN_IV = new Planet(3L, "Yavin IV", "temperature, tropical", "jungle, rainforest");
+        public static final Planet ALDERAAN = new Planet(2L, "Alderaan", "temperate", "grasslands, mountains");
+        public static final Planet YAVIN_IV = new Planet(3L, "Yavin IV", "temperate, tropical", "jungle, rainforest");
         public static final List<Planet> PLANET_LIST = new ArrayList<>() {
             {
                 add(TATOOINE);
