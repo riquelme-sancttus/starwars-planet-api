@@ -5,7 +5,7 @@ import org.springframework.data.domain.ExampleMatcher;
 
 public class QueryBuilder {
     public static Example<Planet> makeQuery(Planet planet) {
-        ExampleMatcher exampleMatcher = ExampleMatcher.matchingAll().withIgnoreCase().withIgnoreNullValues();
+        ExampleMatcher exampleMatcher = ExampleMatcher.matchingAll().withIgnoreCase().withIgnoreNullValues().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         return Example.of(planet, exampleMatcher);
     }
 }
