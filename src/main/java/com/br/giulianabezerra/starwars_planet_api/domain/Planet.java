@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 
 @Entity
-@Table(name = "planet")
+@Table(name = "planets")
 public class Planet {
 
     @Id
