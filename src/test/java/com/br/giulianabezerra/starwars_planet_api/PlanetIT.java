@@ -1,6 +1,7 @@
 package com.br.giulianabezerra.starwars_planet_api;
 
 import com.br.giulianabezerra.starwars_planet_api.domain.Planet;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -26,17 +27,20 @@ public class PlanetIT {
     @LocalServerPort
     private int port;
 
-    private RestClient restClient = RestClient.create();
+    private RestClient restClient;
 
-    private String getBaseUrl() {
-        return "http://localhost:" + port + "/planets";
+    @BeforeEach
+    void setUp() {
+        restClient = RestClient.builder()
+                .baseUrl("http://localhost:" + port + "/planets")
+                .build();
     }
 
     @Test
     public void createPlanet_ValidData_Returns201Created() {
         ResponseEntity<Planet> sut = restClient
                 .post()
-                .uri(getBaseUrl())
+                .uri("")
                 .body(PLANET)
                 .retrieve()
                 .toEntity(Planet.class);
@@ -53,7 +57,7 @@ public class PlanetIT {
         assertThatThrownBy(() ->
                 restClient
                         .post()
-                        .uri(getBaseUrl())
+                        .uri("")
                         .body(INVALID_PLANET)
                         .retrieve()
                         .toEntity(Planet.class)
@@ -67,7 +71,7 @@ public class PlanetIT {
         assertThatThrownBy(() ->
                 restClient
                         .post()
-                        .uri(getBaseUrl())
+                        .uri("")
                         .body(alderaan)
                         .retrieve()
                         .toEntity(Planet.class)
@@ -76,9 +80,12 @@ public class PlanetIT {
 
     @Test
     public void findById_ByExistingId_ReturnsPlanet() {
-        String id = getBaseUrl() + "/id" + "/3";
-
-        ResponseEntity<Planet> sut = restClient.get().uri(id).retrieve().toEntity(Planet.class);
+        ResponseEntity<Planet> sut =
+                restClient
+                        .get()
+                        .uri("/id/{id}", 3)
+                        .retrieve()
+                        .toEntity(Planet.class);
 
         assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(sut.getBody()).isEqualTo(YAVIN_IV);
@@ -86,18 +93,22 @@ public class PlanetIT {
 
     @Test
     public void findById_ByUnexistingId_Returns404NotFound() {
-        String id = getBaseUrl() + "/id" + "/99";
-
         assertThatThrownBy(() ->
-                restClient.get().uri(id).retrieve().toEntity(Planet.class)
+                restClient
+                        .get()
+                        .uri("/id/{id}", 99)
+                        .retrieve()
+                        .toEntity(Planet.class)
         ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
 
     @Test
     public void findByName_ByExistingName_ReturnsPlanet() {
-        String name = getBaseUrl() + "/name" + "/Yavin IV";
-
-        ResponseEntity<Planet> sut = restClient.get().uri(name).retrieve().toEntity(Planet.class);
+        ResponseEntity<Planet> sut = restClient
+                .get()
+                .uri("/name/{name}", "Yavin IV")
+                .retrieve()
+                .toEntity(Planet.class);
 
         assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(sut.getBody()).isEqualTo(YAVIN_IV);
@@ -105,10 +116,12 @@ public class PlanetIT {
 
     @Test
     public void findByName_ByUnexistingName_Returns404NotFound() {
-        String name = getBaseUrl() + "/name/" + "Unexisting Name xD";
-
         assertThatThrownBy(() ->
-                restClient.get().uri(name).retrieve().toEntity(Planet.class)
+                restClient
+                        .get()
+                        .uri("/name/{name}", "Unexisting Name xD")
+                        .retrieve()
+                        .toEntity(Planet.class)
         ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
 
@@ -117,7 +130,7 @@ public class PlanetIT {
         ResponseEntity<List<Planet>> sut =
                 restClient
                         .get()
-                        .uri(getBaseUrl())
+                        .uri("")
                         .retrieve()
                         .toEntity(new ParameterizedTypeReference<List<Planet>>() {});
 
@@ -130,7 +143,7 @@ public class PlanetIT {
     public void listPlanets_ByClimate_ReturnsFilteredPlanets() {
         ResponseEntity<List<Planet>> sut = restClient
                 .get()
-                .uri(getBaseUrl() + "?climate=tropical")
+                .uri("?climate={climate}", "tropical")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<Planet>>() {
                 });
@@ -145,7 +158,7 @@ public class PlanetIT {
     public void listPlanets_ByTerrain_ReturnsFilteredPlanets() {
         ResponseEntity<List<Planet>> sut = restClient
                 .get()
-                .uri(getBaseUrl() + "?terrain=jungle")
+                .uri("?terrain={terrain}", "jungle")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<Planet>>() {});
 
@@ -159,7 +172,7 @@ public class PlanetIT {
     public void listPlanets_ByClimateAndTerrain_ReturnsFilteredPlanets() {
         ResponseEntity<List<Planet>> sut = restClient
                 .get()
-                .uri(getBaseUrl() + "?climate=temperate&terrain=rainforest")
+                .uri("?climate={climate}&terrain={terrain}", "temperate", "rainforest")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<Planet>>() {});
 
@@ -172,7 +185,7 @@ public class PlanetIT {
     public void listPlanets_WithNonExistingFilters_ReturnsEmpty() {
         ResponseEntity<List<Planet>> sut = restClient
                 .get()
-                .uri(getBaseUrl() + "?climate=frozen&terrain=ice")
+                .uri("?climate={climate}&terrain={terrain}", "999X", "999Y")
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<List<Planet>>() {
                 });
@@ -185,7 +198,7 @@ public class PlanetIT {
     public void removePlanet_WithExistingId_Returns204NoContent() {
         ResponseEntity<Void> sut = restClient
                 .delete()
-                .uri(getBaseUrl() + "/2")
+                .uri("/{id}", 2)
                 .retrieve()
                 .toBodilessEntity();
 
@@ -197,7 +210,7 @@ public class PlanetIT {
         assertThatThrownBy(() ->
                 restClient
                         .delete()
-                        .uri(getBaseUrl() + "/99")
+                        .uri("/{id}", 99)
                         .retrieve()
                         .toBodilessEntity()
         ).isInstanceOf(HttpClientErrorException.NotFound.class);
