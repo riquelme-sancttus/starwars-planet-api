@@ -4,6 +4,7 @@ import com.br.giulianabezerra.starwars_planet_api.domain.Planet;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
@@ -11,13 +12,15 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
+import java.util.List;
+
 import static com.br.giulianabezerra.starwars_planet_api.commom.PlanetConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
-@Sql(scripts = "/import_planets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = "/import_planets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class PlanetIT {
 
     @LocalServerPort
@@ -108,4 +111,74 @@ public class PlanetIT {
                 restClient.get().uri(name).retrieve().toEntity(Planet.class)
         ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
+
+    @Test
+    public void listPlanets_ReturnsAll() {
+        ResponseEntity<List<Planet>> sut =
+                restClient
+                .get()
+                .uri(getBaseUrl())
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<Planet>> () {});
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isNotEmpty();
+        assertThat(sut.getBody()).hasSize(3);
+    }
+
+    @Test
+    public void listPlanets_ByClimate_ReturnsFiltredPlanets() {
+        ResponseEntity<List<Planet>> sut = restClient
+                .get()
+                .uri(getBaseUrl() + "?climate=tropical")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<Planet>>() {
+                });
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isNotEmpty();
+        assertThat(sut.getBody()).hasSize(1);
+        assertThat(sut.getBody().getFirst()).isEqualTo(YAVIN_IV);
+    }
+
+    @Test
+    public void listPlanets_ByTerrain_ReturnsFilteredPlanets() {
+        ResponseEntity<List<Planet>> sut = restClient
+                .get()
+                .uri(getBaseUrl() + "?terrain=jungle")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<Planet>>() {});
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isNotEmpty();
+        assertThat(sut.getBody()).hasSize(1);
+        assertThat(sut.getBody().getFirst()).isEqualTo(YAVIN_IV);
+    }
+
+    @Test
+    public void listPlanets_ByClimateAndTerrain_ReturnsFilteredPlanets() {
+        ResponseEntity<List<Planet>> sut = restClient
+                .get()
+                .uri(getBaseUrl() + "?climate=temperate&terrain=rainforest")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<Planet>>() {});
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isNotEmpty();
+        assertThat(sut.getBody().getFirst()).isEqualTo(YAVIN_IV);
+    }
+
+    @Test
+    public void listPlanets_WithNonExistingFilters_ReturnsEmpty() {
+        ResponseEntity<List<Planet>> sut = restClient
+                .get()
+                .uri(getBaseUrl() + "?climate=frozen&terrain=ice")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List<Planet>>() {
+                });
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isEmpty();
+    }
+
 }
