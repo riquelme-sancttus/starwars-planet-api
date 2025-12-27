@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
-@Sql(scripts = "/import_planets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = "/import_planets.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class PlanetIT {
 
     @LocalServerPort
@@ -116,10 +116,10 @@ public class PlanetIT {
     public void listPlanets_ReturnsAll() {
         ResponseEntity<List<Planet>> sut =
                 restClient
-                .get()
-                .uri(getBaseUrl())
-                .retrieve()
-                .toEntity(new ParameterizedTypeReference<List<Planet>> () {});
+                        .get()
+                        .uri(getBaseUrl())
+                        .retrieve()
+                        .toEntity(new ParameterizedTypeReference<List<Planet>>() {});
 
         assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(sut.getBody()).isNotEmpty();
@@ -127,7 +127,7 @@ public class PlanetIT {
     }
 
     @Test
-    public void listPlanets_ByClimate_ReturnsFiltredPlanets() {
+    public void listPlanets_ByClimate_ReturnsFilteredPlanets() {
         ResponseEntity<List<Planet>> sut = restClient
                 .get()
                 .uri(getBaseUrl() + "?climate=tropical")
@@ -181,4 +181,25 @@ public class PlanetIT {
         assertThat(sut.getBody()).isEmpty();
     }
 
+    @Test
+    public void removePlanet_WithExistingId_Returns204NoContent() {
+        ResponseEntity<Void> sut = restClient
+                .delete()
+                .uri(getBaseUrl() + "/2")
+                .retrieve()
+                .toBodilessEntity();
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+    }
+
+    @Test
+    public void removePlanet_WithUnexistingId_Returns404NotFound() {
+        assertThatThrownBy(() ->
+                restClient
+                        .delete()
+                        .uri(getBaseUrl() + "/99")
+                        .retrieve()
+                        .toBodilessEntity()
+        ).isInstanceOf(HttpClientErrorException.NotFound.class);
+    }
 }
