@@ -54,11 +54,11 @@ public class PlanetIT {
                         .body(INVALID_PLANET)
                         .retrieve()
                         .toEntity(Planet.class)
-                ).isInstanceOf(HttpClientErrorException.UnprocessableContent.class);
+        ).isInstanceOf(HttpClientErrorException.UnprocessableContent.class);
     }
 
     @Test
-    public void createPlanet_WithExistingName_Returns409Conflict(){
+    public void createPlanet_WithExistingName_Returns409Conflict() {
         Planet alderaan = new Planet(null, ALDERAAN.getName(), ALDERAAN.getClimate(), ALDERAAN.getTerrain());
 
         assertThatThrownBy(() ->
@@ -69,5 +69,24 @@ public class PlanetIT {
                         .retrieve()
                         .toEntity(Planet.class)
         ).isInstanceOf(HttpClientErrorException.Conflict.class);
+    }
+
+    @Test
+    public void findById_ByExistingId_ReturnsPlanet() {
+        String id = getBaseUrl() + "/id" + "/3";
+
+        ResponseEntity<Planet> sut = restClient.get().uri(id).retrieve().toEntity(Planet.class);
+
+        assertThat(sut.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut.getBody()).isEqualTo(YAVIN_IV);
+    }
+
+    @Test
+    public void findById_ByUnexistingId_Returns404NotFound() {
+        String id = getBaseUrl() + "/id" + "/99";
+
+        assertThatThrownBy(() ->
+                restClient.get().uri(id).retrieve().toEntity(Planet.class)
+        ).isInstanceOf(HttpClientErrorException.NotFound.class);
     }
 }
