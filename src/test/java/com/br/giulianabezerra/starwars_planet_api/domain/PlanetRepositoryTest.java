@@ -25,7 +25,7 @@ class PlanetRepositoryTest {
 
     @Test
     public void createPlanet_WithValidData_ReturnsPlanet() {
-        Planet planet = repository.save(PLANET);
+        Planet planet = repository.save(new Planet(PLANET.getName(), PLANET.getClimate(), PLANET.getTerrain()));
 
         Planet sut = testEntityManager.find(Planet.class, planet.getId());
 
@@ -39,25 +39,23 @@ class PlanetRepositoryTest {
     public void createPlanet_WithInvalidData_ThrowsException() {
         assertThatThrownBy(() -> repository.save(NULL_PLANET));
         assertThatThrownBy(() -> repository.save(INVALID_PLANET));
-
     }
 
+    @Sql(scripts = "/import_planets.sql")
     @Test
     public void createPlanet_WithExistingName_ThrowsException(){
-        Planet planet = testEntityManager.persistFlushFind(PLANET);
-        testEntityManager.detach(planet);
-        planet.setId(null);
+        Planet planet = new Planet(ALDERAAN.getName(), ALDERAAN.getClimate(), ALDERAAN.getTerrain());
 
         assertThatThrownBy(() -> repository.save(planet)).isInstanceOf(RuntimeException.class);
     }
 
+    @Sql("/import_planets.sql")
     @Test
     public void findById_ByExistingId_ReturnsPlanet(){
-        Planet planet = testEntityManager.persistFlushFind(PLANET);
         Optional<Planet> optionalPlanet = repository.findById(1L);
 
         assertThat(optionalPlanet).isPresent();
-        assertThat(optionalPlanet.get()).isEqualTo(PLANET);
+        assertThat(optionalPlanet.get()).isEqualTo(TATOOINE);
     }
 
     @Test
@@ -66,13 +64,13 @@ class PlanetRepositoryTest {
         assertThat(optionalPlanet).isEmpty();
     }
 
+    @Sql(scripts = "/import_planets.sql")
     @Test
     public void findByName_ByExistingName_ReturnsPlanet() {
-        Planet planet = testEntityManager.persistFlushFind(PLANET);
-        Optional<Planet> optionalPlanet = repository.findByName(planet.getName());
+        Optional<Planet> optionalPlanet = repository.findByName(ALDERAAN.getName());
 
         assertThat(optionalPlanet).isPresent();
-        assertThat(optionalPlanet.get()).isEqualTo(PLANET);
+        assertThat(optionalPlanet.get()).isEqualTo(ALDERAAN);
     }
 
     @Test
@@ -93,6 +91,7 @@ class PlanetRepositoryTest {
         assertThat(sut).hasSize(3);
     }
 
+    @Sql(scripts = "/import_planets.sql")
     @Test
     public void listPlanets_ReturnsFilteredPlanets(){
         Example<Planet> queryWithFilter = QueryBuilder.makeQuery(
