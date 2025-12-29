@@ -113,8 +113,7 @@ public class PlanetServiceTest {
            add(PLANET);
        }};
 
-        Example<Planet> query = QueryBuilder.makeQuery(new Planet(PLANET.getName(),
-                PLANET.getClimate(), PLANET.getTerrain()));
+        Example<Planet> query = QueryBuilder.makeQuery(new Planet(PLANET.getClimate(), PLANET.getTerrain()));
 
         when(planetRepository.findAll(query)).thenReturn(planets);
 
